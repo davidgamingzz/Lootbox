@@ -1,9 +1,0 @@
---- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/davidgamingzz/Lootbox
-build-by-default: true
-branches:
-- master
-projects:
-  Lootbox:
-    path: ""
-    icon: “icon.jpg
-...
