@@ -35,7 +35,7 @@ class RollAnimation extends Animation {
     public function __construct(Player $owner, array $rewards) {
         parent::__construct($owner, $rewards);
         $this->inventory = InvMenu::create(InvMenu::TYPE_HOPPER);
-        $this->inventory->readonly();
+        $this->inventory->setListener(InvMenu::readonly());
         $this->inventory->setName(TextFormat::AQUA . TextFormat::BOLD . "Lootbox");
         $glass = Item::get(Item::STAINED_GLASS, 8, 5);
         $glass->setCustomName(TextFormat::RESET . TextFormat::GRAY . "Rolling...");

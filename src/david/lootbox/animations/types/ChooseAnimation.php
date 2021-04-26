@@ -36,7 +36,7 @@ class ChooseAnimation extends Animation {
     public function __construct(Player $owner, array $rewards) {
         parent::__construct($owner, $rewards);
         $this->inventory = InvMenu::create(InvMenu::TYPE_CHEST);
-        $this->inventory->readonly();
+        $this->inventory->setListener(InvMenu::readonly());
         $this->inventory->setName(TextFormat::AQUA . TextFormat::BOLD . "Lootbox");
         $glass = Item::get(Item::STAINED_GLASS, 8, 1);
         $glass->setCustomName(TextFormat::RESET . TextFormat::GRAY . "Rolling...");
