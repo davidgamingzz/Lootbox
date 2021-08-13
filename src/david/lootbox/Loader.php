@@ -15,21 +15,20 @@ class Loader extends PluginBase {
     /** @var LootboxManager */
     private $lootboxManager;
 
-     public function onLoad() {
+    public function onLoad() {
         if(!is_dir($this->getDataFolder())) {
             mkdir($this->getDataFolder());
         }
         if(!is_dir($this->getDataFolder() . "lootboxes")) {
             mkdir($this->getDataFolder() . "lootboxes");
         }
-        foreach(scandir($this->getFile() . "lootboxes") as $file){
+        foreach(scandir($this->getDataFolder() . "lootboxes") as $file) {
             if($file === "." || $file === "..") continue;
-            if(pathinfo($this->getFile() . "lootboxes" . $file, PATHINFO_EXTENSION) !== "yml") continue;
-            $this->saveResource("lootboxes/{$file}");
+            if(pathinfo($this->getDataFolder() . "lootboxes" . $file, PATHINFO_EXTENSION) !== "yml") continue;
+            $this->saveResource("lootboxes" . DIRECTORY_SEPARATOR . $file);
         }
         self::$instance = $this;
     }
-
 
     public function onEnable() {
         $this->lootboxManager = new LootboxManager($this);
