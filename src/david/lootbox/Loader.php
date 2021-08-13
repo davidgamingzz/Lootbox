@@ -22,7 +22,11 @@ class Loader extends PluginBase {
         if(!is_dir($this->getDataFolder() . "lootboxes")) {
             mkdir($this->getDataFolder() . "lootboxes");
         }
-        $this->saveResource("lootboxes" . DIRECTORY_SEPARATOR . "test.yml");
+        foreach(scandir($this->getDataFolder() . "lootboxes") as $file) {
+            if($file === "." || $file === "..") continue;
+            if(pathinfo($this->getDataFolder() . "lootboxes" . $file, PATHINFO_EXTENSION) !== "yml") continue;
+            $this->saveResource("lootboxes" . DIRECTORY_SEPARATOR . $file);
+        }
         self::$instance = $this;
     }
 
