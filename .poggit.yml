@@ -5,4 +5,7 @@ branches:
 projects:
   Lootbox:
     path: ""
+    libs:
+      - src: muqsit/invMenu/invMenu
+        version: 4.6.5
 ...
