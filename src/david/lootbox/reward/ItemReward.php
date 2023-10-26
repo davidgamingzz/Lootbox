@@ -5,12 +5,11 @@ declare(strict_types = 1);
 namespace david\lootbox\reward;
 
 use pocketmine\item\Item;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 class ItemReward extends Reward {
-
     /** @var Item */
-    protected $givenItem;
+    protected Item $givenItem;
 
     /**
      * ItemReward constructor.

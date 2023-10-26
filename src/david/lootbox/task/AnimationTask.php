@@ -8,9 +8,8 @@ use david\lootbox\animations\Animation;
 use pocketmine\scheduler\Task;
 
 class AnimationTask extends Task {
-
     /** @var Animation */
-    private $animation;
+    private Animation $animation;
 
     /**
      * AnimationTask constructor.
@@ -21,10 +20,7 @@ class AnimationTask extends Task {
         $this->animation = $animation;
     }
 
-    /**
-     * @param int $currentTick
-     */
-    public function onRun(int $currentTick) {
+    public function onRun(): void {
         $this->animation->tick($this);
     }
 }

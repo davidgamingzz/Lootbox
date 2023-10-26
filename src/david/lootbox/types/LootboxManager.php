@@ -8,20 +8,19 @@ use DaPigGuy\PiggyCustomEnchants\CustomEnchantManager;
 use david\lootbox\Loader;
 use david\lootbox\reward\CommandReward;
 use david\lootbox\reward\ItemReward;
-use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\enchantment\EnchantmentInstance;
-use pocketmine\item\Item;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\item\enchantment\StringToEnchantmentParser;
+use pocketmine\item\StringToItemParser;
+use pocketmine\Server;
 use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat;
 
 class LootboxManager {
-
     /** @var Loader */
-    private $plugin;
+    private Loader $plugin;
 
     /** @var Lootbox[] */
-    private $lootboxes = [];
+    private array $lootboxes = [];
 
     /**
      * CrateManager constructor.
@@ -33,7 +32,7 @@ class LootboxManager {
         $this->init();
     }
 
-    public function init() {
+    public function init(): void {
         foreach(scandir($path = $this->plugin->getDataFolder() . "lootboxes" . DIRECTORY_SEPARATOR) as $file) {
             $parts = explode(".", $file);
             if($file == "." or $file == "..") {
@@ -45,35 +44,39 @@ class LootboxManager {
                 foreach($config->get("rewards") as $reward) {
                     $parts = explode(":", $reward);
                     $name = TextFormat::colorize($parts[0]);
-                    $displayItem = Item::get((int)$parts[1], 0, 1);
+                    $displayItem = StringToItemParser::getInstance()->parse($parts[1]);
                     $displayItem->setCustomName($name);
                     $chance = (int)$parts[2];
-                    $type = (string)$parts[3];
+                    $type = $parts[3];
                     if($type === "command") {
-                        $command = (string)$parts[4];
+                        $command = $parts[4];
                         $rewards[] = new CommandReward($name, $displayItem, $command, $chance);
                         continue;
                     }
                     if($type === "item") {
-                        $item = Item::get((int)$parts[5], (int)$parts[6], (int)$parts[7]);
-                        $customName = (string)$parts[4];
+                        $item = StringToItemParser::getInstance()->parse($parts[5]);
+                        $customName = $parts[4];
                         if($customName !== "default") {
                             $item->setCustomName(TextFormat::colorize($customName));
                         }
-                        $enchantments = array_slice($parts, 8);
+                        $enchantments = array_slice($parts, 7);
                         if(!empty($enchantments)) {
                             $enchantmentsArrays = array_chunk($enchantments, 2);
                             foreach($enchantmentsArrays as $enchantmentsData) {
                                 if(count($enchantmentsData) !== 2) {
-                                    $this->plugin->getLogger()->error("Error while parsing {$file} as crate because it is not a valid YAML file. Had trouble parsing this part: $reward Please check for errors");
+                                    $this->plugin->getLogger()->error("Error while parsing $file as crate because it is not a valid YAML file. Had trouble parsing this part: $reward, Enchantment data is not valid.");
                                     return;
                                 }
-                                $enchantmentId = (int)$enchantmentsData[0];
-                                if($enchantmentId >= 100) {
-                                    $enchantment = CustomEnchantManager::getEnchantment($enchantmentId);
+                                $enchantmentId = $enchantmentsData[0];
+                                $enchantment = StringToEnchantmentParser::getInstance()->parse($enchantmentId);
+                                if(Server::getInstance()->getPluginManager()->getPlugin("PiggyCustomEnchants") !== null) {
+                                    if(CustomEnchantManager::getEnchantmentByName($enchantmentId) !== null) {
+                                        $enchantment = CustomEnchantManager::getEnchantmentByName($enchantmentId);
+                                    }
                                 }
-                                else {
-                                    $enchantment = Enchantment::getEnchantment($enchantmentId);
+                                if($enchantment === null) {
+                                    $this->plugin->getLogger()->error("Error while parsing $file as crate because it is not a valid YAML file. Had trouble parsing this part: $reward, Enchantment data is not valid.");
+                                    return;
                                 }
                                 $enchantmentLevel = (int)$enchantmentsData[1];
                                 $enchantment = new EnchantmentInstance($enchantment, $enchantmentLevel);
@@ -83,25 +86,23 @@ class LootboxManager {
                         $rewards[] = new ItemReward($name, $displayItem, $item, $chance);
                         continue;
                     }
-                    $this->plugin->getLogger()->error("Error while parsing {$file} as crate because it is not a valid YAML file. Had trouble parsing this part: $reward Please check for errors");
+                    $this->plugin->getLogger()->error("Error while parsing $file as crate because it is not a valid YAML file. Had trouble parsing this part: $reward Please check for errors");
                     return;
                 }
                 $name = (string)$config->get("name", "Undefined");
                 $displayName = (string)$config->get("displayName", "Undefined");
                 $identifier = (string)$config->get("identifier", "Undefined");
                 if(!preg_match("/[a-z]/i", $identifier)) {
-                    $this->plugin->getLogger()->error("Error while parsing {$file} as crate because it is not a valid YAML file. Identifier can only contain letters!");
+                    $this->plugin->getLogger()->error("Error while parsing $file as crate because it is not a valid YAML file. Identifier can only contain letters!");
                     return;
                 }
-                if(strpos($identifier, " ") !== false) {
-                    $this->plugin->getLogger()->error("Error while parsing {$file} as crate because it is not a valid YAML file. Identifier can't contain spaces!");
+                if(str_contains($identifier, " ")) {
+                    $this->plugin->getLogger()->error("Error while parsing $file as crate because it is not a valid YAML file. Identifier can't contain spaces!");
                 }
                 $animationType = (string)$config->get("animationType");
-                $itemId = (int)$config->get("itemId", 54);
-                $item = Item::get($itemId, 0, 1);
-                $item->setNamedTagEntry(new CompoundTag("Lootbox"));
-                /** @var CompoundTag $tag */
-                $tag = $item->getNamedTagEntry("Lootbox");
+                $itemId = $config->get("itemId", "chest");
+                $item = StringToItemParser::getInstance()->parse($itemId);
+                $tag = $item->getNamedTag();
                 $tag->setString("Identifier", $identifier);
                 $item->setCustomName(TextFormat::colorize($displayName));
                 $item->setLore([
@@ -110,10 +111,9 @@ class LootboxManager {
                 ]);
                 $crate = new Lootbox($name, $displayName, $identifier, $item, $animationType, $rewards);
                 $this->addLootbox($crate);
+                return;
             }
-            else {
-                $this->plugin->getLogger()->error("Error while parsing {$file} as crate because it is not a valid YAML file");
-            }
+            $this->plugin->getLogger()->error("Error while parsing $file as crate because it is not a valid YAML file");
         }
     }
 
@@ -130,13 +130,13 @@ class LootboxManager {
      * @return Lootbox|null
      */
     public function getLootbox(string $identifier): ?Lootbox {
-        return isset($this->lootboxes[strtolower($identifier)]) ? $this->lootboxes[strtolower($identifier)] : null;
+        return $this->lootboxes[strtolower($identifier)] ?? null;
     }
 
     /**
      * @param Lootbox $crate
      */
-    public function addLootbox(Lootbox $crate) {
+    public function addLootbox(Lootbox $crate): void {
         $this->lootboxes[strtolower($crate->getIdentifier())] = $crate;
     }
 }

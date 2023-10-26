@@ -5,27 +5,32 @@ declare(strict_types=1);
 namespace david\lootbox\animations\types;
 
 use david\lootbox\animations\Animation;
-use david\lootbox\Loader;
 use david\lootbox\reward\Reward;
 use muqsit\invmenu\inventory\InvMenuInventory;
 use muqsit\invmenu\InvMenu;
+use muqsit\invmenu\transaction\InvMenuTransaction;
+use muqsit\invmenu\transaction\InvMenuTransactionResult;
+use muqsit\invmenu\type\InvMenuTypeIds;
+use pocketmine\block\BlockTypeIds;
+use pocketmine\block\utils\DyeColor;
+use pocketmine\block\VanillaBlocks;
+use pocketmine\inventory\Inventory;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\item\Item;
-use pocketmine\level\sound\ClickSound;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\scheduler\Task;
 use pocketmine\utils\TextFormat;
+use pocketmine\world\sound\ClickSound;
 
 class ChooseAnimation extends Animation {
-
     /** @var InvMenu */
-    private $inventory;
+    private InvMenu $inventory;
 
     /** @var InvMenuInventory */
-    private $actualInventory;
+    private Inventory $actualInventory;
 
     /** @var Reward[] */
-    private $finalRewards = [];
+    private array $finalRewards = [];
 
     /**
      * ChooseAnimation constructor.
@@ -35,10 +40,10 @@ class ChooseAnimation extends Animation {
      */
     public function __construct(Player $owner, array $rewards) {
         parent::__construct($owner, $rewards);
-        $this->inventory = InvMenu::create(InvMenu::TYPE_CHEST);
+        $this->inventory = InvMenu::create(InvMenuTypeIds::TYPE_CHEST);
         $this->inventory->setListener(InvMenu::readonly());
         $this->inventory->setName(TextFormat::AQUA . TextFormat::BOLD . "Lootbox");
-        $glass = Item::get(Item::STAINED_GLASS, 8, 1);
+        $glass = VanillaBlocks::STAINED_GLASS()->setColor(DyeColor::LIGHT_GRAY())->asItem();
         $glass->setCustomName(TextFormat::RESET . TextFormat::GRAY . "Rolling...");
         $this->actualInventory = $this->inventory->getInventory();
         for($i = 0; $i <= 26; $i++) {
@@ -76,7 +81,8 @@ class ChooseAnimation extends Animation {
             return;
         }
         if($this->ticks === 100) {
-            $chest = Item::get(Item::CHEST, 3, 1);
+            $chest = VanillaBlocks::CHEST()->asItem();
+            $chest->getNamedTag()->setInt("lootbox", 1);
             $chest->setCustomName(TextFormat::RESET . TextFormat::RED . "????");
             $chest->setLore([
                 "",
@@ -85,13 +91,21 @@ class ChooseAnimation extends Animation {
             for($i = 0; $i <= 26; $i++) {
                 $this->actualInventory->setItem($i, $chest);
             }
-            $this->inventory->setListener(function(Player $player, Item $itemClicked, Item $itemClickedWith, SlotChangeAction $action): bool {
-                if($itemClicked->getId() === Item::CHEST and $itemClicked->getDamage() === 3) {
+            $this->inventory->setListener(function(InvMenuTransaction $transaction): InvMenuTransactionResult {
+                $itemClicked = $transaction->getItemClicked();
+                $action = $transaction->getAction();
+
+                $tag = $itemClicked->getNamedTag();
+
+                if(!$itemClicked->getBlock()->getTypeId() == BlockTypeIds::CHEST) return $transaction->discard();
+                if($tag->getTag("lootbox") === null) return $transaction->discard();
+                if($tag->getInt("lootbox") == 1) {
                     $reward = $this->getReward();
                     $this->finalRewards[] = $reward;
                     $action->getInventory()->setItem($action->getSlot(), $reward->getItem());
+                    $this->owner->getWorld()->addSound($this->owner->getPosition(), new ClickSound(), [$this->owner]);
                 }
-                return false;
+                return $transaction->discard();
             });
             $this->inventory->setInventoryCloseListener(function(Player $player, InvMenuInventory $inventory): void {
                 for($i = count($this->finalRewards) + 1; $i <= 5; $i++) {
@@ -116,10 +130,10 @@ class ChooseAnimation extends Animation {
             }
             $this->inventory->setInventoryCloseListener(function(Player $player, InvMenuInventory $inventory): void {
             });
-            $this->owner->addXp(1000000);
-            $this->owner->subtractXp(1000000);
-            $this->owner->removeWindow($this->actualInventory, true);
-            Loader::getInstance()->getScheduler()->cancelTask($task->getTaskId());
+            $this->owner->getXpManager()->addXp(1000000);
+            $this->owner->getXpManager()->subtractXp(1000000);
+            $this->owner->removeCurrentWindow();
+            $task->getHandler()->cancel();
         }
     }
 
@@ -130,7 +144,7 @@ class ChooseAnimation extends Animation {
             $rewards[$i] = $this->getReward();
             $this->actualInventory->setItem($i, $rewards[$i]->getItem());
         }
-        $this->owner->getLevel()->addSound(new ClickSound($this->owner));
+        $this->owner->getWorld()->addSound($this->owner->getPosition(), new ClickSound(), [$this->owner]);
         return $rewards;
     }
 }

@@ -9,24 +9,23 @@ use pocketmine\item\Item;
 use pocketmine\utils\TextFormat;
 
 class Lootbox {
+    /** @var string */
+    private string $name;
 
     /** @var string */
-    private $name;
+    private string $displayName;
 
     /** @var string */
-    private $displayName;
-
-    /** @var string */
-    private $identifier;
+    private string $identifier;
 
     /** @var Item */
-    private $item;
+    private Item $item;
 
     /** @var string */
-    private $animationType;
+    private string $animationType;
 
     /** @var Reward[] */
-    private $rewards = [];
+    private array $rewards = [];
 
     /**
      * Lootbox constructor.

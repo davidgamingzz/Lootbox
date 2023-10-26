@@ -13,20 +13,19 @@ use david\lootbox\Loader;
 use david\lootbox\reward\Reward;
 use david\lootbox\task\AnimationTask;
 use david\lootbox\types\Lootbox;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\plugin\PluginException;
 use pocketmine\scheduler\Task;
 
 abstract class Animation {
-
     /** @var Player */
-    protected $owner;
+    protected Player $owner;
 
     /** @var Reward[] */
-    protected $rewards = [];
+    protected array $rewards = [];
 
     /** @var int */
-    protected $ticks = 0;
+    protected int $ticks = 0;
 
     /**
      * Animation constructor.
@@ -43,8 +42,8 @@ abstract class Animation {
      * @param Task $task
      */
     public function tick(Task $task): void {
-        if($this->owner === null or $this->owner->isOnline() === false) {
-            Loader::getInstance()->getScheduler()->cancelTask($task->getTaskId());
+        if($this->owner->isOnline() === false) {
+            $task->getHandler()->cancel();
             return;
         }
         $this->ticks++;
@@ -90,7 +89,6 @@ abstract class Animation {
                 break;
             default:
                 throw new PluginException("Invalid animation type: \"{$lootbox->getAnimationType()}\" in lootbox \"{$lootbox->getIdentifier()}\"");
-                break;
         }
     }
 }

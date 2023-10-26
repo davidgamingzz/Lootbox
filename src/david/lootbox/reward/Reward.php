@@ -7,18 +7,17 @@ namespace david\lootbox\reward;
 use pocketmine\item\Item;
 
 class Reward {
-
     /** @var string */
-    protected $name;
+    protected string $name;
 
     /** @var Item */
-    protected $item;
+    protected Item $item;
 
     /** @var callable */
     protected $callback;
 
     /** @var int */
-    protected $chance;
+    protected int $chance;
 
     /**
      * Reward constructor.

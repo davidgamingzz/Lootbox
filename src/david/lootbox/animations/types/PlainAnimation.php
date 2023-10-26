@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace david\lootbox\animations\types;
 
 use david\lootbox\animations\Animation;
-use david\lootbox\Loader;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\scheduler\Task;
 
 class PlainAnimation extends Animation {
-
     /**
      * PlainAnimation constructor.
      *
@@ -28,8 +26,8 @@ class PlainAnimation extends Animation {
         $reward = $this->getReward();
         $callable = $reward->getCallback();
         $callable($this->owner);
-        $this->owner->addXp(1000000);
-        $this->owner->subtractXp(1000000);
-        Loader::getInstance()->getScheduler()->cancelTask($task->getTaskId());
+        $this->owner->getXpManager()->addXp(1000000);
+        $this->owner->getXpManager()->subtractXp(1000000);
+        $task->getHandler()->cancel();
     }
 }

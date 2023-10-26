@@ -8,14 +8,13 @@ use muqsit\invmenu\InvMenuHandler;
 use pocketmine\plugin\PluginBase;
 
 class Loader extends PluginBase {
-
     /** @var self */
-    private static $instance;
+    private static self $instance;
 
     /** @var LootboxManager */
-    private $lootboxManager;
+    private LootboxManager $lootboxManager;
 
-    public function onLoad() {
+    public function onLoad(): void {
         if(!is_dir($this->getDataFolder())) {
             mkdir($this->getDataFolder());
         }
@@ -30,7 +29,7 @@ class Loader extends PluginBase {
         self::$instance = $this;
     }
 
-    public function onEnable() {
+    public function onEnable(): void {
         $this->lootboxManager = new LootboxManager($this);
         $this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
         $this->getServer()->getCommandMap()->register("givelootbox", new GiveLootBoxCommand());
@@ -39,16 +38,12 @@ class Loader extends PluginBase {
         }
     }
 
-    /**
-     * @return self
-     */
+    /** @return self */
     public static function getInstance(): self {
         return self::$instance;
     }
 
-    /**
-     * @return LootboxManager
-     */
+    /** @return LootboxManager */
     public function getLootboxManager(): LootboxManager {
         return $this->lootboxManager;
     }

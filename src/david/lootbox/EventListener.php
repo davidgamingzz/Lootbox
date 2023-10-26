@@ -7,14 +7,10 @@ namespace david\lootbox;
 use david\lootbox\animations\Animation;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerInteractEvent;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\StringTag;
-use pocketmine\Player;
 
 class EventListener implements Listener {
-
     /** @var Loader */
-    private $plugin;
+    private Loader $plugin;
 
     /**
      * EventListener constructor.
@@ -29,25 +25,18 @@ class EventListener implements Listener {
      * @priority HIGHEST
      * @param PlayerInteractEvent $event
      */
-    public function onPlayerInteract(PlayerInteractEvent $event): void {
+    public function onPlayerInteract(PlayerInteractEvent $event): void{
         $item = $event->getItem();
         $player = $event->getPlayer();
-        if(!$player instanceof Player) {
-            return;
-        }
         $inventory = $player->getInventory();
-        $tag = $item->getNamedTagEntry("Lootbox");
-        if($tag === null) {
-            return;
-        }
-        if($tag instanceof CompoundTag) {
-            if($tag->hasTag("Identifier", StringTag::class)) {
-                $identifier = $tag->getString("Identifier");
-                $lootbox = $this->plugin->getLootboxManager()->getLootbox($identifier);
-                $inventory->setItemInHand($item->setCount($item->getCount() - 1));
-                Animation::startAnimation($player, $lootbox);
-                $event->setCancelled();
-            }
-        }
+
+        $tag = $item->getNamedTag();
+        if ($tag->getTag("Identifier") === null) return;
+
+        $identifier = $tag->getString("Identifier");
+        $lootbox = $this->plugin->getLootboxManager()->getLootbox($identifier);
+        $inventory->setItemInHand($item->setCount($item->getCount() - 1));
+        Animation::startAnimation($player, $lootbox);
+        $event->cancel();
     }
 }

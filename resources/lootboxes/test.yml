@@ -3,18 +3,18 @@ name: "Test"
 displayName: "&b&lTest"
 identifier: "test" # Can only contain letters, no spaces
 animationType: "roll" # roll, slide, plain, display, choose
-itemId: 54
+itemId: chest # minecraft item name
 # Type can only be "command" or "item"
 #
 # For item:
-# "Name:DisplayItem:Chance (1-100):Type:CustomName (Or "default" for default name):Id:Damage:Amount:EnchantmentId:EnchantmentLevel:EnchantmentId:EnchantmentLevel..."
+# "Name:DisplayItemName:Chance (1-100):Type:CustomName (Or "default" for default name):ItemName:Amount:EnchantmentName:EnchantmentLevel:EnchantmentName:EnchantmentLevel..."
 #
 # For command:
 # "Name:DisplayItem:Chance (1-100):Type:Command"
 # Arguments:
 # {player} - Player name
 rewards:
-  - "&r&l&cx64 Apples:260:100:item:default:260:0:64"
-  - "&r&l&cx64 Apples:260:100:command:give {player} 260 64"
-  - "&r&l&4Enchanted Sword:276:100:item:&r&4&lEnchanted Sword:276:0:1:9:5"
+  - "&r&l&cx64 Apples:apple:100:item:default:apple:64"
+  - "&r&l&cx64 Apples:apple:100:command:give {player} 260 64"
+  - "&r&l&4Enchanted Sword:diamond_sword:100:item:&r&4&lEnchanted Sword:diamond_sword:1:sharpness:5"
 ...

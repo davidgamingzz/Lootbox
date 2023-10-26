@@ -5,26 +5,28 @@ declare(strict_types=1);
 namespace david\lootbox\animations\types;
 
 use david\lootbox\animations\Animation;
-use david\lootbox\Loader;
 use david\lootbox\reward\Reward;
 use muqsit\invmenu\inventory\InvMenuInventory;
 use muqsit\invmenu\InvMenu;
-use pocketmine\item\Item;
-use pocketmine\level\sound\ClickSound;
-use pocketmine\Player;
+use muqsit\invmenu\type\InvMenuTypeIds;
+use pocketmine\block\StainedGlass;
+use pocketmine\block\utils\DyeColor;
+use pocketmine\block\VanillaBlocks;
+use pocketmine\inventory\Inventory;
+use pocketmine\world\sound\ClickSound;
+use pocketmine\player\Player;
 use pocketmine\scheduler\Task;
 use pocketmine\utils\TextFormat;
 
 class SlideAnimation extends Animation {
-
     /** @var InvMenu */
-    private $inventory;
+    private InvMenu $inventory;
 
-    /** @var InvMenuInventory */
-    private $actualInventory;
+    /** @var Inventory */
+    private Inventory $actualInventory;
 
     /** @var Reward[] */
-    private $selector = [];
+    private array $selector = [];
 
     /**
      * SlideAnimation constructor.
@@ -34,10 +36,10 @@ class SlideAnimation extends Animation {
      */
     public function __construct(Player $owner, array $rewards) {
         parent::__construct($owner, $rewards);
-        $this->inventory = InvMenu::create(InvMenu::TYPE_CHEST);
+        $this->inventory = InvMenu::create(InvMenuTypeIds::TYPE_CHEST);
         $this->inventory->setListener(InvMenu::readonly());
         $this->inventory->setName(TextFormat::AQUA . TextFormat::BOLD . "Lootbox");
-        $glass = Item::get(Item::STAINED_GLASS, 8, 1);
+        $glass = VanillaBlocks::STAINED_GLASS()->setColor(DyeColor::LIGHT_GRAY())->asItem();
         $glass->setCustomName(TextFormat::RESET . TextFormat::GRAY . "Rolling...");
         $this->actualInventory = $this->inventory->getInventory();
         for($i = 0; $i <= 8; $i++) {
@@ -46,7 +48,10 @@ class SlideAnimation extends Animation {
         for($i = 18; $i <= 26; $i++) {
             $this->actualInventory->setItem($i, $glass);
         }
-        $this->actualInventory->setItem(22, $glass->setDamage(13));
+        $block = $glass->getBlock();
+        if($block instanceof StainedGlass) {
+            $this->actualInventory->setItem(22, $block->setColor(DyeColor::GREEN())->asItem());
+        }
         $this->inventory->setInventoryCloseListener(function(Player $player, InvMenuInventory $inventory): void {
             $reward = $this->getReward();
             $callable = $reward->getCallback();
@@ -79,16 +84,16 @@ class SlideAnimation extends Animation {
         if($this->ticks < 100 and $this->ticks % 15 == 0) {
             $this->inventory->setInventoryCloseListener(function(Player $player, InvMenuInventory $inventory): void {
                 $reward = $this->selector[13];
-                $this->owner->addXp(1000000);
-                $this->owner->subtractXp(1000000);
+                $this->owner->getXpManager()->addXp(1000000);
+                $this->owner->getXpManager()->subtractXp(1000000);
                 $callable = $reward->getCallback();
                 $callable($player);
             });
             return;
         }
         if($this->ticks >= 140) {
-            $this->owner->removeWindow($this->actualInventory, true);
-            Loader::getInstance()->getScheduler()->cancelTask($task->getTaskId());
+            $this->owner->removeCurrentWindow();
+            $task->getHandler()->cancel();
         }
     }
 
@@ -106,7 +111,7 @@ class SlideAnimation extends Animation {
         foreach($this->selector as $index => $reward) {
             $this->actualInventory->setItem($index, $reward->getItem());
         }
-        $this->owner->getLevel()->addSound(new ClickSound($this->owner));
+        $this->owner->getWorld()->addSound($this->owner->getPosition(), new ClickSound(), [$this->owner]);
         return $this->selector[13] ?? $this->getReward();
     }
 }
