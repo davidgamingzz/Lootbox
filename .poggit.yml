@@ -4,6 +4,7 @@ branches:
 - master
 projects:
   Lootbox:
+    icon: "icon.png"
     path: ""
     libs:
       - src: muqsit/invMenu/invMenu
