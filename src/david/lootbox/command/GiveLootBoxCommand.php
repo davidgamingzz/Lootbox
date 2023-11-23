@@ -20,7 +20,7 @@ class GiveLootBoxCommand extends Command {
     /**
      * GiveLootBoxCommand constructor.
      */
-    public function __construct(private readonly PluginBase $plugin) {
+    public function __construct(private PluginBase $plugin) {
         parent::__construct("givelootbox", "Give lootbox to a player.", "/givelootbox <player> <identifier> [amount = 1]");
 
         $this->setPermission("lootbox.command.give");

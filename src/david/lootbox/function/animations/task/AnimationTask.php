@@ -13,7 +13,7 @@ class AnimationTask extends Task {
      *
      * @param Animation $animation
      */
-    public function __construct(private readonly Animation $animation) { }
+    public function __construct(private Animation $animation) { }
 
     public function onRun(): void {
         $this->animation->tick($this);

@@ -14,7 +14,7 @@ class EventListener implements Listener {
      *
      * @param Loader $plugin
      */
-    public function __construct(private readonly Loader $plugin) {}
+    public function __construct(private Loader $plugin) {}
 
     /**
      * @priority HIGHEST

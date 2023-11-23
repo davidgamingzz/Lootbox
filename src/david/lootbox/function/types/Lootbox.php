@@ -19,7 +19,7 @@ class Lootbox {
      * @param string $animationType
      * @param array $rewards
      */
-    public function __construct(private readonly string $name, private readonly string $displayName, private readonly string $identifier, private readonly Item $item, private readonly string $animationType, private readonly array $rewards = []) { }
+    public function __construct(private string $name, private string $displayName, private string $identifier, private Item $item, private string $animationType, private array $rewards = []) { }
 
     /**
      * @return string
