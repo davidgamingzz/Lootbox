@@ -1,6 +1,6 @@
 ---
 name: "Test"
-displayName: "&b&lTest"
+displayName: "&r&b&lTest"
 identifier: "test" # Can only contain letters, no spaces
 animationType: "roll" # roll, slide, plain, display, choose
 itemId: chest # minecraft item name

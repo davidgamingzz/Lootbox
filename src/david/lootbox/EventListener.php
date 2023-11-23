@@ -4,28 +4,23 @@ declare(strict_types=1);
 
 namespace david\lootbox;
 
-use david\lootbox\animations\Animation;
+use david\lootbox\function\animations\Animation;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerInteractEvent;
 
 class EventListener implements Listener {
-    /** @var Loader */
-    private Loader $plugin;
-
     /**
      * EventListener constructor.
      *
      * @param Loader $plugin
      */
-    public function __construct(Loader $plugin) {
-        $this->plugin = $plugin;
-    }
+    public function __construct(private readonly Loader $plugin) {}
 
     /**
      * @priority HIGHEST
      * @param PlayerInteractEvent $event
      */
-    public function onPlayerInteract(PlayerInteractEvent $event): void{
+    public function onPlayerInteract(PlayerInteractEvent $event): void {
         $item = $event->getItem();
         $player = $event->getPlayer();
         $inventory = $player->getInventory();
@@ -35,6 +30,8 @@ class EventListener implements Listener {
 
         $identifier = $tag->getString("Identifier");
         $lootbox = $this->plugin->getLootboxManager()->getLootbox($identifier);
+
+        if ($lootbox === null) return;
         $inventory->setItemInHand($item->setCount($item->getCount() - 1));
         Animation::startAnimation($player, $lootbox);
         $event->cancel();

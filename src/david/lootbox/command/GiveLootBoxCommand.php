@@ -9,16 +9,22 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\player\Player;
+use pocketmine\plugin\PluginBase;
+use pocketmine\plugin\PluginOwnedTrait;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class GiveLootBoxCommand extends Command {
+    use PluginOwnedTrait;
+
     /**
      * GiveLootBoxCommand constructor.
      */
-    public function __construct() {
+    public function __construct(private readonly PluginBase $plugin) {
         parent::__construct("givelootbox", "Give lootbox to a player.", "/givelootbox <player> <identifier> [amount = 1]");
-        $this->setPermission("lootbox.give");
+
+        $this->setPermission("lootbox.command.give");
+        $this->owningPlugin = $plugin;
     }
 
     /**
@@ -28,20 +34,20 @@ class GiveLootBoxCommand extends Command {
      */
     public function execute(CommandSender $sender, string $commandLabel, array $args): void {
         $server = Server::getInstance();
-        if($sender instanceof ConsoleCommandSender or $server->isOp($sender->getName())) {
-            if(!isset($args[2])) {
+        if ($sender instanceof ConsoleCommandSender or $server->isOp($sender->getName())) {
+            if (!isset($args[2])) {
                 $sender->sendMessage(TextFormat::YELLOW . $this->getUsage());
                 return;
             }
 
             $player = Loader::getInstance()->getServer()->getPlayerExact($args[0]);
-            if(!$player instanceof Player) {
+            if (!$player instanceof Player) {
                 $sender->sendMessage(TextFormat::DARK_RED . TextFormat::BOLD . "Invalid player!");
                 return;
             }
 
             $lootbox = Loader::getInstance()->getLootboxManager()->getLootbox($args[1]);
-            if($lootbox === null) {
+            if ($lootbox === null) {
                 $sender->sendMessage(TextFormat::DARK_RED . TextFormat::BOLD . "Invalid lootbox!\n");
 
                 $identifiers = [];
