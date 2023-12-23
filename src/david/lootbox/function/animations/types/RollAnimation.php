@@ -2,22 +2,20 @@
 
 declare(strict_types=1);
 
-namespace david\lootbox\animations\types;
+namespace david\lootbox\function\animations\types;
 
-use david\lootbox\animations\Animation;
-use david\lootbox\Loader;
-use david\lootbox\reward\Reward;
+use david\lootbox\function\animations\Animation;
+use david\lootbox\function\reward\Reward;
 use muqsit\invmenu\inventory\InvMenuInventory;
 use muqsit\invmenu\InvMenu;
 use muqsit\invmenu\type\InvMenuTypeIds;
 use pocketmine\block\utils\DyeColor;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\inventory\Inventory;
-use pocketmine\item\Item;
-use pocketmine\world\sound\ClickSound;
 use pocketmine\player\Player;
 use pocketmine\scheduler\Task;
 use pocketmine\utils\TextFormat;
+use pocketmine\world\sound\ClickSound;
 
 class RollAnimation extends Animation {
     /** @var InvMenu */
@@ -46,9 +44,9 @@ class RollAnimation extends Animation {
         $this->actualInventory = $this->inventory->getInventory();
         $this->actualInventory->setItem(0, $glass);
         $this->actualInventory->setItem(4, $glass);
-        $this->inventory->setInventoryCloseListener(function(Player $player, InvMenuInventory $inventory): void {
+        $this->inventory->setInventoryCloseListener(function (Player $player, InvMenuInventory $inventory): void {
             $rewards = $this->roll();
-            foreach($rewards as $reward) {
+            foreach ($rewards as $reward) {
                 $callable = $reward->getCallback();
                 $callable($player);
             }
@@ -57,11 +55,25 @@ class RollAnimation extends Animation {
     }
 
     /**
+     * @return Reward[]
+     */
+    public function roll(): array {
+        /** @var Reward[] $rewards */
+        $rewards = [];
+        for ($i = 1; $i <= 3; $i++) {
+            $rewards[$i] = $this->getReward();
+            $this->actualInventory->setItem($i, $rewards[$i]->getItem());
+        }
+        $this->owner->getWorld()->addSound($this->owner->getPosition(), new ClickSound(), [$this->owner]);
+        return $rewards;
+    }
+
+    /**
      * @param Task $task
      */
     public function tick(Task $task): void {
         parent::tick($task);
-        if($this->ticks % 20 == 0) {
+        if ($this->ticks % 20 == 0) {
             $item = $this->actualInventory->getItem(0);
             $item->setCount($item->getCount() - 1);
             $this->actualInventory->setItem(0, $item);
@@ -69,52 +81,38 @@ class RollAnimation extends Animation {
             $item->setCount($item->getCount() - 1);
             $this->actualInventory->setItem(4, $item);
         }
-        if($this->ticks < 20 and $this->ticks % 4 == 0) {
+        if ($this->ticks < 20 and $this->ticks % 4 == 0) {
             $this->roll();
             return;
         }
-        if($this->ticks < 40 and $this->ticks % 7 == 0) {
+        if ($this->ticks < 40 and $this->ticks % 7 == 0) {
             $this->roll();
             return;
         }
-        if($this->ticks < 60 and $this->ticks % 10 == 0) {
+        if ($this->ticks < 60 and $this->ticks % 10 == 0) {
             $this->roll();
             return;
         }
-        if($this->ticks < 80 and $this->ticks % 13 == 0) {
+        if ($this->ticks < 80 and $this->ticks % 13 == 0) {
             $this->roll();
             return;
         }
-        if($this->ticks < 100 and $this->ticks % 15 == 0) {
+        if ($this->ticks < 100 and $this->ticks % 15 == 0) {
             $this->finalRewards = $this->roll();
-            $this->inventory->setInventoryCloseListener(function(Player $player, InvMenuInventory $inventory): void {
+            $this->inventory->setInventoryCloseListener(function (Player $player, InvMenuInventory $inventory): void {
                 $rewards = $this->roll();
-                foreach($rewards as $reward) {
+                foreach ($rewards as $reward) {
                     $callable = $reward->getCallback();
                     $callable($player);
                 }
             });
             return;
         }
-        if($this->ticks >= 140) {
+        if ($this->ticks >= 140) {
             $this->owner->getXpManager()->addXp(1000000);
             $this->owner->getXpManager()->subtractXp(1000000);
             $this->owner->removeCurrentWindow();
             $task->getHandler()->cancel();
         }
-    }
-
-    /**
-     * @return Reward[]
-     */
-    public function roll(): array {
-        /** @var Reward[] $rewards */
-        $rewards = [];
-        for($i = 1; $i <= 3; $i++) {
-            $rewards[$i] = $this->getReward();
-            $this->actualInventory->setItem($i, $rewards[$i]->getItem());
-        }
-        $this->owner->getWorld()->addSound($this->owner->getPosition(), new ClickSound(), [$this->owner]);
-        return $rewards;
     }
 }

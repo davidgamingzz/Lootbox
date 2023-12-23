@@ -1,8 +1,12 @@
---- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/davidgamingzz/Lootbox
+--- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/newcoolboys/Lootbox
 build-by-default: true
 branches:
 - master
 projects:
   Lootbox:
+    icon: "icon.png"
     path: ""
+    libs:
+      - src: muqsit/invMenu/invMenu
+        version: 4.6.5
 ...

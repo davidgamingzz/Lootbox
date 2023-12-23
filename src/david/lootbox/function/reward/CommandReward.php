@@ -1,8 +1,8 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
-namespace david\lootbox\reward;
+namespace david\lootbox\function\reward;
 
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\item\Item;
@@ -10,9 +10,6 @@ use pocketmine\player\Player;
 use pocketmine\Server;
 
 class CommandReward extends Reward {
-    /** @var string */
-    protected string $command;
-
     /**
      * CommandReward constructor.
      *
@@ -21,11 +18,9 @@ class CommandReward extends Reward {
      * @param string $command
      * @param int $chance
      */
-    public function __construct(string $name, Item $item, string $command, int $chance) {
-        $this->command = $command;
-
+    public function __construct(string $name, Item $item, protected string $command, int $chance) {
         $server = Server::getInstance();
-        $callable = function(Player $player) use ($server) {
+        $callable = function (Player $player) use ($server) {
             $player->getServer()->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), str_replace("{player}", $player->getName(), $this->command));
         };
         parent::__construct($name, $item, $callable, $chance);

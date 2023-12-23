@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace david\lootbox\animations\types;
+namespace david\lootbox\function\animations\types;
 
-use david\lootbox\animations\Animation;
-use david\lootbox\reward\Reward;
+use david\lootbox\function\animations\Animation;
+use david\lootbox\function\reward\Reward;
 use muqsit\invmenu\inventory\InvMenuInventory;
 use muqsit\invmenu\InvMenu;
 use muqsit\invmenu\type\InvMenuTypeIds;
@@ -13,10 +13,10 @@ use pocketmine\block\StainedGlass;
 use pocketmine\block\utils\DyeColor;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\inventory\Inventory;
-use pocketmine\world\sound\ClickSound;
 use pocketmine\player\Player;
 use pocketmine\scheduler\Task;
 use pocketmine\utils\TextFormat;
+use pocketmine\world\sound\ClickSound;
 
 class SlideAnimation extends Animation {
     /** @var InvMenu */
@@ -42,17 +42,17 @@ class SlideAnimation extends Animation {
         $glass = VanillaBlocks::STAINED_GLASS()->setColor(DyeColor::LIGHT_GRAY())->asItem();
         $glass->setCustomName(TextFormat::RESET . TextFormat::GRAY . "Rolling...");
         $this->actualInventory = $this->inventory->getInventory();
-        for($i = 0; $i <= 8; $i++) {
+        for ($i = 0; $i <= 8; $i++) {
             $this->actualInventory->setItem($i, $glass);
         }
-        for($i = 18; $i <= 26; $i++) {
+        for ($i = 18; $i <= 26; $i++) {
             $this->actualInventory->setItem($i, $glass);
         }
         $block = $glass->getBlock();
-        if($block instanceof StainedGlass) {
+        if ($block instanceof StainedGlass) {
             $this->actualInventory->setItem(22, $block->setColor(DyeColor::GREEN())->asItem());
         }
-        $this->inventory->setInventoryCloseListener(function(Player $player, InvMenuInventory $inventory): void {
+        $this->inventory->setInventoryCloseListener(function (Player $player, InvMenuInventory $inventory): void {
             $reward = $this->getReward();
             $callable = $reward->getCallback();
             $callable($player);
@@ -65,24 +65,24 @@ class SlideAnimation extends Animation {
      */
     public function tick(Task $task): void {
         parent::tick($task);
-        if($this->ticks < 20 and $this->ticks % 4 == 0) {
+        if ($this->ticks < 20 and $this->ticks % 4 == 0) {
             $this->roll();
             return;
         }
-        if($this->ticks < 40 and $this->ticks % 7 == 0) {
+        if ($this->ticks < 40 and $this->ticks % 7 == 0) {
             $this->roll();
             return;
         }
-        if($this->ticks < 60 and $this->ticks % 10 == 0) {
+        if ($this->ticks < 60 and $this->ticks % 10 == 0) {
             $this->roll();
             return;
         }
-        if($this->ticks < 80 and $this->ticks % 13 == 0) {
+        if ($this->ticks < 80 and $this->ticks % 13 == 0) {
             $this->roll();
             return;
         }
-        if($this->ticks < 100 and $this->ticks % 15 == 0) {
-            $this->inventory->setInventoryCloseListener(function(Player $player, InvMenuInventory $inventory): void {
+        if ($this->ticks < 100 and $this->ticks % 15 == 0) {
+            $this->inventory->setInventoryCloseListener(function (Player $player, InvMenuInventory $inventory): void {
                 $reward = $this->selector[13];
                 $this->owner->getXpManager()->addXp(1000000);
                 $this->owner->getXpManager()->subtractXp(1000000);
@@ -91,7 +91,7 @@ class SlideAnimation extends Animation {
             });
             return;
         }
-        if($this->ticks >= 140) {
+        if ($this->ticks >= 140) {
             $this->owner->removeCurrentWindow();
             $task->getHandler()->cancel();
         }
@@ -101,14 +101,14 @@ class SlideAnimation extends Animation {
      * @return Reward
      */
     public function roll(): Reward {
-        foreach($this->selector as $index => $reward) {
-            if($index === 17) {
+        foreach ($this->selector as $index => $reward) {
+            if ($index === 17) {
                 break;
             }
             $this->selector[$index + 1] = $reward;
         }
         $this->selector[9] = $this->getReward();
-        foreach($this->selector as $index => $reward) {
+        foreach ($this->selector as $index => $reward) {
             $this->actualInventory->setItem($index, $reward->getItem());
         }
         $this->owner->getWorld()->addSound($this->owner->getPosition(), new ClickSound(), [$this->owner]);

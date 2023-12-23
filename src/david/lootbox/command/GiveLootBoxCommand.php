@@ -7,17 +7,25 @@ namespace david\lootbox\command;
 use david\lootbox\Loader;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\ConsoleCommandSender;
-use pocketmine\Player;
+use pocketmine\console\ConsoleCommandSender;
+use pocketmine\player\Player;
+use pocketmine\plugin\PluginBase;
+use pocketmine\plugin\PluginOwnedTrait;
+use pocketmine\Server;
 use pocketmine\utils\TextFormat;
+use pocketmine\plugin\PluginOwned;
 
-class GiveLootBoxCommand extends Command {
+class GiveLootBoxCommand extends Command implements PluginOwned {
+    use PluginOwnedTrait;
 
     /**
      * GiveLootBoxCommand constructor.
      */
-    public function __construct() {
+    public function __construct(private PluginBase $plugin) {
         parent::__construct("givelootbox", "Give lootbox to a player.", "/givelootbox <player> <identifier> [amount = 1]");
+
+        $this->setPermission("lootbox.command.give");
+        $this->owningPlugin = $plugin;
     }
 
     /**
@@ -26,21 +34,32 @@ class GiveLootBoxCommand extends Command {
      * @param array $args
      */
     public function execute(CommandSender $sender, string $commandLabel, array $args): void {
-        if($sender instanceof ConsoleCommandSender or $sender->isOp()) {
-            if(!isset($args[2])) {
+        $server = Server::getInstance();
+        if ($sender instanceof ConsoleCommandSender or $server->isOp($sender->getName())) {
+            if (!isset($args[2])) {
                 $sender->sendMessage(TextFormat::YELLOW . $this->getUsage());
                 return;
             }
-            $player = Loader::getInstance()->getServer()->getPlayer($args[0]);
-            if(!$player instanceof Player) {
+
+            $player = Loader::getInstance()->getServer()->getPlayerExact($args[0]);
+            if (!$player instanceof Player) {
                 $sender->sendMessage(TextFormat::DARK_RED . TextFormat::BOLD . "Invalid player!");
                 return;
             }
+
             $lootbox = Loader::getInstance()->getLootboxManager()->getLootbox($args[1]);
-            if($lootbox === null) {
-                $sender->sendMessage(TextFormat::DARK_RED . TextFormat::BOLD . "Invalid lootbox!");
+            if ($lootbox === null) {
+                $sender->sendMessage(TextFormat::DARK_RED . TextFormat::BOLD . "Invalid lootbox!\n");
+
+                $identifiers = [];
+                $lootboxes = Loader::getInstance()->getLootboxManager()->getLootboxes();
+                foreach ($lootboxes as $lootbox) {
+                    $identifiers[] = $lootbox->getIdentifier();
+                }
+                $sender->sendMessage(TextFormat::DARK_RED . TextFormat::BOLD . "Available lootboxes: " . implode(", ", $identifiers));
                 return;
             }
+
             $amount = max(1, is_numeric($args[2]) ? (int)$args[2] : 1);
             $item = $lootbox->getItem();
             $item->setCount($amount);
@@ -48,6 +67,5 @@ class GiveLootBoxCommand extends Command {
             return;
         }
         $sender->sendMessage(TextFormat::DARK_RED . TextFormat::BOLD . "Insufficient permission!");
-        return;
     }
 }

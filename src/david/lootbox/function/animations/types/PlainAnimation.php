@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace david\lootbox\animations\types;
+namespace david\lootbox\function\animations\types;
 
-use david\lootbox\animations\Animation;
+use david\lootbox\function\animations\Animation;
 use pocketmine\player\Player;
 use pocketmine\scheduler\Task;
 

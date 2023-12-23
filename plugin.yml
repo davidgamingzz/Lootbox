@@ -1,8 +1,13 @@
 name: Lootbox
 main: david\lootbox\Loader
 load: POSTWORLD
-version: "2.0"
-api: 3.0.0
+version: "3.0"
+api: 5.0.0
 authors:
   - David
-description: Lootbox
+description: A lootbox plugin that let's you create as many type of lootboxes as you want with 5 animation choices.
+
+permissions:
+  lootbox.command.give:
+    default: op
+    description: Allows you to give lootboxes to players

@@ -1,24 +1,19 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
-namespace david\lootbox\task;
+namespace david\lootbox\function\animations\task;
 
-use david\lootbox\animations\Animation;
+use david\lootbox\function\animations\Animation;
 use pocketmine\scheduler\Task;
 
 class AnimationTask extends Task {
-    /** @var Animation */
-    private Animation $animation;
-
     /**
      * AnimationTask constructor.
      *
      * @param Animation $animation
      */
-    public function __construct(Animation $animation) {
-        $this->animation = $animation;
-    }
+    public function __construct(private Animation $animation) { }
 
     public function onRun(): void {
         $this->animation->tick($this);

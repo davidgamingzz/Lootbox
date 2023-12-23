@@ -1,37 +1,25 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
-namespace david\lootbox\reward;
+namespace david\lootbox\function\reward;
 
 use pocketmine\item\Item;
 
 class Reward {
-    /** @var string */
-    protected string $name;
-
-    /** @var Item */
-    protected Item $item;
-
     /** @var callable */
     protected $callback;
-
-    /** @var int */
-    protected int $chance;
 
     /**
      * Reward constructor.
      *
      * @param string $name
      * @param Item $item
-     * @param callable $callable
+     * @param \Closure $callable
      * @param int $chance
      */
-    public function __construct(string $name, Item $item, callable $callable, int $chance) {
-        $this->name = $name;
-        $this->item = $item;
+    public function __construct(protected string $name, protected Item $item, callable $callable, protected int $chance) {
         $this->callback = $callable;
-        $this->chance = $chance;
     }
 
     /**

@@ -1,32 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
-namespace david\lootbox\types;
+namespace david\lootbox\function\types;
 
-use david\lootbox\reward\Reward;
+use david\lootbox\function\reward\Reward;
 use pocketmine\item\Item;
 use pocketmine\utils\TextFormat;
 
 class Lootbox {
-    /** @var string */
-    private string $name;
-
-    /** @var string */
-    private string $displayName;
-
-    /** @var string */
-    private string $identifier;
-
-    /** @var Item */
-    private Item $item;
-
-    /** @var string */
-    private string $animationType;
-
-    /** @var Reward[] */
-    private array $rewards = [];
-
     /**
      * Lootbox constructor.
      *
@@ -37,14 +19,7 @@ class Lootbox {
      * @param string $animationType
      * @param array $rewards
      */
-    public function __construct(string $name, string $displayName, string $identifier, Item $item, string $animationType, array $rewards) {
-        $this->name = $name;
-        $this->displayName = $displayName;
-        $this->identifier = $identifier;
-        $this->item = $item;
-        $this->animationType = $animationType;
-        $this->rewards = $rewards;
-    }
+    public function __construct(private string $name, private string $displayName, private string $identifier, private Item $item, private string $animationType, private array $rewards = []) { }
 
     /**
      * @return string
