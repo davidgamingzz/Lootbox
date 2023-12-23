@@ -13,8 +13,9 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\plugin\PluginOwnedTrait;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
+use pocketmine\plugin\PluginOwned;
 
-class GiveLootBoxCommand extends Command {
+class GiveLootBoxCommand extends Command implements PluginOwned {
     use PluginOwnedTrait;
 
     /**
